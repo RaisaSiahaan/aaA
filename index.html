@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grape Clicker Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Counter Bar */
+        #top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(75, 0, 130, 0.9);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .counter-container {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .grape-icon {
+            font-size: 30px;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        #reset-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        #reset-btn:hover {
+            background: #ff6b81;
+        }
+
+        /* Game Environment */
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 100%;
+            margin-top: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 50px;
+        }
+
+        /* The Grape Tree/Vine Structure */
+        #tree-container {
+            position: relative;
+            width: 300px;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #trunk {
+            width: 30px;
+            height: 180px;
+            background: #8B4513;
+            border-radius: 5px;
+            position: absolute;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        #foliage {
+            width: 280px;
+            height: 280px;
+            background: #2ed573;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            box-shadow: inset -20px -20px 0 rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        /* Interactive Grape Bunches on the Tree */
+        .clickable-grape {
+            position: absolute;
+            font-size: 45px;
+            z-index: 3;
+            transition: transform 0.1s ease;
+            cursor: pointer;
+        }
+
+        .clickable-grape:active {
+            transform: scale(0.85);
+        }
+
+        /* Specific positions for bunches on the tree */
+        #bunch1 { top: 80px; left: 60px; }
+        #bunch2 { top: 60px; left: 130px; }
+        #bunch3 { top: 90px; right: 50px; }
+        #bunch4 { top: 160px; left: 80px; }
+        #bunch5 { top: 150px; right: 70px; }
+
+        /* Falling Grapes Effects */
+        .falling-grape {
+            position: absolute;
+            font-size: 25px;
+            pointer-events: none;
+            z-index: 4;
+            animation: fall 1s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .floating-text {
+            position: absolute;
+            color: #fff;
+            font-weight: bold;
+            font-size: 20px;
+            text-shadow: 2px 2px 0px #4b0082;
+            pointer-events: none;
+            z-index: 5;
+            animation: floatUp 0.8s forwards;
+        }
+
+        /* Ground */
+        #ground {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: #7bed9f;
+            z-index: 0;
+            box-shadow: inset 0 10px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Animations */
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(400px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-60px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar Counter -->
+    <div id="top-bar">
+        <div class="counter-container">
+            <span class="grape-icon">🍇</span>
+            Grapes: <span id="grape-count" style="margin-left: 10px;">0</span>
+        </div>
+        <button id="reset-btn">Reset</button>
+    </div>
+
+    <!-- Main Game Area -->
+    <div id="game-container">
+        <div id="tree-container">
+            <div id="trunk"></div>
+            <div id="foliage"></div>
+            
+            <!-- Interactive Grape Bunches -->
+            <div class="clickable-grape" id="bunch1">🍇</div>
+            <div class="clickable-grape" id="bunch2">🍇</div>
+            <div class="clickable-grape" id="bunch3">🍇</div>
+            <div class="clickable-grape" id="bunch4">🍇</div>
+            <div class="clickable-grape" id="bunch5">🍇</div>
+        </div>
+    </div>
+
+    <div id="ground"></div>
+
+    <script>
+        // Track the total number of grapes collected
+        let totalGrapes = localStorage.getItem('grapeCount') ? parseInt(localStorage.getItem('grapeCount')) : 0;
+        
+        const countDisplay = document.getElementById('grape-count');
+        const clickableGrapes = document.querySelectorAll('.clickable-grape');
+        const gameContainer = document.getElementById('game-container');
+        const resetBtn = document.getElementById('reset-btn');
+
+        // Update the top bar with the initial saved score
+        countDisplay.textContent = totalGrapes;
+
+        // Loop through all grape bunches and add click events
+        clickableGrapes.forEach(grapeBunch => {
+            grapeBunch.addEventListener('click', (e) => {
+                // Increase the score
+                totalGrapes++;
+                countDisplay.textContent = totalGrapes;
+                localStorage.setItem('grapeCount', totalGrapes);
+
+                // Get coordinates of the clicked bunch to spawn effects
+                const rect = e.target.getBoundingClientRect();
+                const containerRect = gameContainer.getBoundingClientRect();
+                
+                // Calculate position relative to the game container
+                const x = rect.left - containerRect.left + (rect.width / 2);
+                const y = rect.top - containerRect.top + (rect.height / 2);
+
+                // Trigger animations
+                createFallingGrape(x, y);
+                createFloatingText(x, y);
+            });
+        });
+
+        // Creates a loose single grape that falls down when harvested
+        function createFallingGrape(x, y) {
+            const singleGrape = document.createElement('div');
+            singleGrape.className = 'falling-grape';
+            singleGrape.textContent = '🍇';
+            singleGrape.style.left = `${x - 12}px`; // Center the emoji
+            singleGrape.style.top = `${y - 12}px`;
+            
+            // Random horizontal drift
+            const randomXDrift = (Math.random() - 0.5) * 60;
+            singleGrape.style.setProperty('--drift', `${randomXDrift}px`);
+            
+            gameContainer.appendChild(singleGrape);
+
+            // Clean up element after animation finishes
+            setTimeout(() => {
+                singleGrape.remove();
+            }, 1000);
+        }
+
+        // Creates a "+1" visual pop-up text effect
+        function createFloatingText(x, y) {
+            const text = document.createElement('div');
+            text.className = 'floating-text';
+            text.textContent = '+1';
+            text.style.left = `${x - 10}px`;
+            text.style.top = `${y - 20}px`;
+
+            gameContainer.appendChild(text);
+
+            setTimeout(() => {
+                text.remove();
+            }, 800);
+        }
+
+        // Reset system
+        resetBtn.addEventListener('click', () => {
+            totalGrapes = 0;
+            countDisplay.textContent = totalGrapes;
+            localStorage.setItem('grapeCount', totalGrapes);
+        });
+    </script>
+</body>
+</html>
+
+
